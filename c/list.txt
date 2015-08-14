@@ -1,0 +1,246 @@
+===============================================================================
+Ceng140 20122
+Laboratory Exam 4 - Section 1
+===============================================================================
+
+In this lab, you are expected to implement several functions about linked lists.
+
+You are *NOT* going to write a "main" function. Instead, you will define a function named "execute", which will be called when you execute your program in lab. Note that, this function will not be called for evaluation and grading of your program. It is provided only to enable you to test your functions manually. Prototype for execute function is as follows:
+
+void execute();
+
+Prototypes of functions that you will implement will be given in the header file "lab4.h". You will have to define execute function and the other functions even if you leave them empty. You should include lab4.h header in your code by writing the line below:
+
+#include "lab4.h"
+
+You will implement functions for doubly-linked lists in which each node has previous, next pointer and an integer data field.
+
+The structure for nodes of the linked list is defined as follows:
+
+typedef struct node
+{
+    int data;
+    struct node *prev;
+    struct node *next;
+} node;
+
+The following lines are written in "lab4.h":
+
+#define DATA(p) ((p)->data)
+#define NEXT(p) ((p)->next)
+#define PREV(p) ((p)->prev)
+
+
+List of functions:
+
+void execute();
+void print_list(node *head);
+node* create_list();
+int sum(node *head);
+void delete_node(node **head, int value);
+void insert_node(node **head, int value);
+node* combine(node *first, node *second);
+
+You will have two example linked lists to test your function:
+node *ex1, *ex2;
+
+            ______     ______     ______     ______ 
+    ex1--> |   2  |   |   5  |   |   7  |   |   9  |
+           |______|   |______|   |______|   |______|
+   NULL <--| prev |<--| prev |<--| prev |<--| prev | 
+           |______|   |______|   |______|   |______|      
+           | next |-->| next |-->| next |-->| next |-->NULL
+           |______|   |______|   |______|   |______|   
+
+            ______     ______     ______     ______ 
+    ex2--> |  20  |   |  50  |   |  70  |   |  90  |
+           |______|   |______|   |______|   |______|
+   NULL <--| prev |<--| prev |<--| prev |<--| prev | 
+           |______|   |______|   |______|   |______|   
+           | next |-->| next |-->| next |-->| next |--> NULL
+           |______|   |______|   |______|   |______|
+
+
+-------------------------------------------------------------------------------
+(1) void print_list(node *head);  (5 points)
+
+This function prints the contents of the doubly-linked list pointed by "head". Each element should be separated with a space character.
+
+Restrictions: Do not use malloc(), calloc(), realloc()
+
+EXAMPLE:
+
+void execute()
+{
+    print_list(ex1);
+}
+
+prints
+2 5 7 9
+
+-------------------------------------------------------------------------------
+
+(2) node* create_list();  (20 points)
+
+This function creates a doubly-linked list from a global "int *". The details of this "int *" is hidden from you. You may access the elements of it with a function whose prototype is given below:
+
+int getNext();
+
+This function returns the first element in the first call, the second element in the second call and so on. The end of the "int *" is marked with -1. Add each element of the global "int *" to the end of the previously added node. Do not add -1 at the end. Return the head pointer of the resulting doubly-linked list.
+
+==== EXAMPLE 1 =====
+
+If the contents of global "int *" is:
+{3, 4, 2, -1}
+then
+printf("%d ", getNext());
+printf("%d ", getNext());
+printf("%d ", getNext());
+printf("%d\n", getNext());
+
+prints:
+3 4 2 -1
+
+==== EXAMPLE 2 ====
+
+If the contents of the global "int *" is:
+{7, 3, 5, 4, -1} 
+
+void execute()
+{
+    node *result;
+    result = create_list();
+    print_list(result);
+}
+
+prints:
+7 3 5 4
+
+Doubly-linked list:
+            ______     ______     ______     ______
+ result--> |   7  |   |   3  |   |   5  |   |   4  |
+           |______|   |______|   |______|   |______|
+   NULL <--| prev |<--| prev |<--| prev |<--| prev |   
+           |______|   |______|   |______|   |______|   
+           | next |-->| next |-->| next |-->| next |--> NULL
+           |______|   |______|   |______|   |______|
+
+
+-------------------------------------------------------------------------------
+
+(3) int sum(node *head);  (15 points)
+
+This function returns the sum of the elements of the doubly-linked list pointed by "head".
+
+Restrictions: Do not use malloc(), calloc(), realloc()
+
+==== EXAMPLE ====
+
+void execute()
+{
+    print_list(ex1);
+    printf("Sum is %d\n", sum(ex1));
+}
+
+prints:
+2 5 7 9
+Sum is 23
+
+-------------------------------------------------------------------------------
+
+(4) void delete_node(node **head, int value);  (20 points)
+
+This function deletes the node whose data field is "value" from the doubly-linked list pointed by "head", updates the related pointers and deallocates the space of the node. Do not change any other node. Only the first node with this property should be deleted.
+
+Restrictions: Do not use malloc(), calloc(), realloc()
+free() can only be used to free a node.
+
+==== EXAMPLE ====
+
+void execute()
+{
+    printf("Before\n");
+    print_list(ex1);
+    delete_node(&ex1, 7);
+    printf("After\n");
+    print_list(ex1);
+}
+
+prints:
+
+Before
+2 5 7 9
+After
+2 5 9
+
+Doubly-linked list after:
+            ______     ______     ______  
+    ex1--> |   2  |   |   5  |   |   9  |
+           |______|   |______|   |______|
+   NULL <--| prev |<--| prev |<--| prev |
+           |______|   |______|   |______|
+           | next |-->| next |-->| next |-->NULL
+           |______|   |______|   |______|
+
+-------------------------------------------------------------------------------
+
+(5) void insert_node(node **head, int value);  (20 points)
+
+This function inserts a new node whose data field is set to "value" to the doubly-linked list pointed by "head" and updates the related pointers. Elements of the doubly-linked list are sorted in an increasing order. The new node should be inserted to the appropriate position. No duplicate node values. Do not change any other node.
+
+==== EXAMPLE ====
+
+
+void execute()
+{
+    printf("Before\n");
+    print_list(ex1);
+    insert_node(&ex1, 6);
+    printf("After\n");
+    print_list(ex1);
+}
+
+prints:
+Before
+2 5 7 9
+After
+2 5 6 7 9
+
+Doubly-linked list after:
+            ______     ______     ______     ______     ______
+   head--> |   2  |   |   5  |   |   6  |   |   7  |   |   9  |
+           |______|   |______|   |______|   |______|   |______|
+   NULL <--| prev |<--| prev |<--| prev |<--| prev |<--| prev | 
+           |______|   |______|   |______|   |______|   |______|   
+           | next |-->| next |-->| next |-->| next |-->| next |--> NULL
+           |______|   |______|   |______|   |______|   |______|
+
+-------------------------------------------------------------------------------
+
+(6) node* combine(node *first, node *second);  (20 points)
+
+This function combines two *EQUAL* length doubly-linked lists pointed by "first" and "second" and returns the resulting list.
+Assume that "first" holds the elements F0,F1,F2,... and "second" holds the elements S0,S1,S2,...
+Then the returned list should contain the elements in this order: F0,S0,F1,S1,F2,S2,...
+Do not make any allocations or deallocations (malloc, calloc, realloc, free). Only update pointers. Do not change node data.
+
+Restrictions: Do not use malloc(), calloc(), realloc()
+
+EXAMPLE:
+
+void execute()
+{
+    node *result;
+    printf("ex1: ");
+    print_list(ex1);
+    printf("ex2: ");
+    print_list(ex2);
+    result = combine(ex1, ex2);
+    printf("result: ");
+    print_list(result);
+}
+
+prints:
+ex1: 2 5 7 9
+ex2: 20 50 70 90
+result: 2 20 5 50 7 70 9 90
