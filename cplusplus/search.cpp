@@ -22,6 +22,7 @@ int biSearch (vector <int> &a, int toFind)
 	while (min <= max)
 	{
 		int mid = (max - min) / 2;
+		cout << max << " " << min << endl;
 		if (a[mid] == toFind)
 			return mid;
 		else if (a[mid] < toFind)
@@ -41,6 +42,7 @@ int intSearch (vector <int> &a, int toFind)
 	while (min <= max)
 	{
 		int mid = min + ( (toFind - a[min]) * (max - min) ) / (a[min] - a[max]);
+		cout << mid << endl;
 		if (a[mid] == toFind)
 			return mid;
 		else if (a[mid] < toFind)
@@ -49,7 +51,6 @@ int intSearch (vector <int> &a, int toFind)
 			min = mid + 1;
 	}
 	return -1;
-}
 }
 
 int main()
