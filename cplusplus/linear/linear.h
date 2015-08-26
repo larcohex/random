@@ -4,16 +4,48 @@
 #include <iostream>
 #include <stdexcept>
 
-//	Vector
-
+//	Classes
 
 struct v // vector
 {
 	double x, y, z;
+	v &operator+= (const v &rhs)
+	{
+		this->x += rhs.x;
+		this->y += rhs.y;
+		this->z += rhs.z;
+		return *this;
+	}
+
+	v &operator-= (const v &rhs)
+	{
+		this->x -= rhs.x;
+		this->y -= rhs.y;
+		this->z -= rhs.z;
+		return *this;
+	}
 };
 
 
-// Matrix
+inline v operator+ (v lhs, const v &rhs)
+{
+	lhs += rhs;
+	return lhs;
+}
+
+
+inline v operator- (v lhs, const v &rhs)
+{
+	lhs -= rhs;
+	return lhs;
+}
+
+
+std::ostream &operator<< (std::ostream &output, const v &vec)
+{
+	output << vec.x << " " << vec.y << " " << vec.z;
+	return output;
+}
 
 
 class m // matrix
@@ -63,6 +95,22 @@ class m // matrix
 			delete this->matrix;
 		}
 
+
+		m (const m &m2)
+		{
+			this->nrows = m2.nrows;
+			this->ncols = m2.ncols;
+			this->matrix = new double *[this->nrows];
+			for (int i = 0; i < nrows; ++i)
+			{
+				this->matrix[i] = new double [this->ncols];
+				for (int j = 0; j < ncols; ++j)
+				{
+					this->matrix[i][j] = m2.matrix[i][j];
+				}
+			}
+		}
+
 		void assign (int r, int c, double v)
 		{
 			this->matrix[r][c] = v;
@@ -87,7 +135,7 @@ class m // matrix
 			return this->ncols;
 		}
 
-		m minor (int row, int col)
+		m min (int row, int col)
 		{
 			if (this->nrows < 2 || this->ncols < 2)
 			{
@@ -124,76 +172,100 @@ class m // matrix
 			}
 			return result;
 		}
+
+		friend void swap (m &m1, m &m2);
+
+		m &operator= (m rhs)
+		{
+			swap (*this, rhs);
+			return *this;
+		}
+
+
+		m &operator+= (const m &rhs)
+		{
+			if ((this->nrows != rhs.nrows) || (this->ncols != rhs.ncols))
+			{
+				throw std::runtime_error ("Matrices with different dimensions cannot be added");
+			}
+			for (int i = 0; i < this->nrows; ++i)
+			{
+				for (int j = 0; j < this->ncols; ++j)
+				{
+					this->matrix[i][j] += rhs.matrix[i][j];
+				}
+			}
+			return *this;
+		}
+
+
+		m &operator-= (const m &rhs)
+		{
+			if ((this->nrows != rhs.nrows) || (this->ncols != rhs.ncols))
+			{
+				throw std::runtime_error ("Matrices with different dimensions cannot be added");
+			}
+			for (int i = 0; i < this->nrows; ++i)
+			{
+				for (int j = 0; j < this->ncols; ++j)
+				{
+					this->matrix[i][j] -= rhs.matrix[i][j];
+				}
+			}
+			return *this;
+		}
+
+		m operator* (const m &rhs) // matrix multiplication
+		{
+			if (this->ncols != rhs.nrows)
+			{
+				throw std::runtime_error ("Wrong dimensions for matrix multiplication");
+			}
+			m result (this->nrows, rhs.ncols);
+			for (int i = 0; i < this->nrows; ++i)
+			{
+				for (int j = 0; j < rhs.ncols; ++j)
+				{
+					result[i][j] = 0;
+					for (int k = 0; k < this->ncols; ++k)
+					{
+						result[i][j] += this->matrix[i][k] * rhs.matrix[k][j];
+					}
+				}
+			}
+			return result;
+		}
 };
 
 
-//	Vector functions
-
-
-std::ostream &operator<< (std::ostream &output, const v &vec)
+void swap (m &m1, m &m2)
 {
-	output << vec.x << " " << vec.y << " " << vec.z;
-	return output;
+	double **temp = m1.matrix;
+	int tempR, tempC;
+	tempR = m1.nrows;
+	tempC = m1.ncols;
+	m1.matrix = m2.matrix;
+	m2.matrix = temp;
+	m1.nrows = m2.nrows;
+	m1.ncols = m2.ncols;
+	m2.nrows = tempR;
+	m2.ncols = tempC;
 }
 
 
-v v_add (v &v1, v &v2) // addition
+inline m operator+ (m lhs, const m &rhs)
 {
-	v result;
-	result.x = v1.x + v2.x;
-	result.y = v1.y + v2.y;
-	result.z = v1.z + v2.z;
-	return result;
+	lhs += rhs;
+	return lhs;
 }
 
 
-v v_subtr (v &v1, v &v2) // subtraction
+inline m operator- (m lhs, const m &rhs)
 {
-	v result;
-	result.x = v1.x - v2.x;
-	result.y = v1.y - v2.y;
-	result.z = v1.z - v2.z;
-	return result;	
+	lhs -= rhs;
+	return lhs;
 }
 
-
-v v_mult (double n, v &vec)	// multiplication by a constant
-{
-	v result;
-	result.x = n * vec.x;
-	result.y = n * vec.y;
-	result.z = n * vec.z;
-	return result;
-}
-
-
-double v_dot (v &v1, v &v2) // dot product
-{
-	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
-}
-
-
-v v_cross (v &v1, v &v2) // cross product
-{
-	v result;
-	result.x = v1.y * v2.z - v1.z * v2.y;
-	result.y = v1.z * v2.x - v1.x * v2.z;
-	result.z = v1.x * v2.y - v1.y * v2.x;
-	return result;
-}
-
-
-v lerp (v &v1, v &v2, double beta) // linear interpolation (0 <= beta <= 1)
-{
-	if ((beta < 0) || (beta > 1))
-	{
-		throw std::runtime_error ("Beta not in range");
-	}
-	
-}
-
-
-//	Matrix functions
 
 std::ostream &operator<< (std::ostream &output, const m &mat)
 {
@@ -215,6 +287,48 @@ std::ostream &operator<< (std::ostream &output, const m &mat)
 }
 
 
+//	Vector functions
+
+
+v c_mult (double n, v &vec)	// multiplication by a constant
+{
+	v result;
+	result.x = n * vec.x;
+	result.y = n * vec.y;
+	result.z = n * vec.z;
+	return result;
+}
+
+
+double dot (v &v1, v &v2) // dot product
+{
+	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+}
+
+
+v cross (v &v1, v &v2) // cross product
+{
+	v result;
+	result.x = v1.y * v2.z - v1.z * v2.y;
+	result.y = v1.z * v2.x - v1.x * v2.z;
+	result.z = v1.x * v2.y - v1.y * v2.x;
+	return result;
+}
+
+
+v lerp (v &v1, v &v2, double beta) // linear interpolation (0 <= beta <= 1)
+{
+	if ((beta < 0) || (beta > 1))
+	{
+		throw std::runtime_error ("Beta not in range");
+	}
+	
+}
+
+
+//	Matrix functions
+
+
 m m_trans (m &m1)
 {
 	m result (m1.getCols(), m1.getRows());
@@ -223,28 +337,6 @@ m m_trans (m &m1)
 		for (int j = 0; j < result.getCols(); ++j)
 		{
 			result[i][j] = m1[j][i];
-		}
-	}
-	return result;
-}
-
-
-m m_mult (m &m1, m &m2) // matrix multiplication
-{
-	if (m1.getCols() != m2.getRows())
-	{
-		throw std::runtime_error ("Wrong dimensions for matrix multiplication");
-	}
-	m result (m1.getRows(), m2.getCols());
-	for (int i = 0; i < result.getRows(); ++i)
-	{
-		for (int j = 0; j < result.getCols(); ++j)
-		{
-			result[i][j] = 0;
-			for (int k = 0; k < m1.getCols(); ++k)
-			{
-				result[i][j] += m1[i][k] * m2[k][j];
-			}
 		}
 	}
 	return result;
@@ -306,7 +398,7 @@ double m_det (m &mat) // matrix determinant
 			{
 				if (mat[row][i] != 0)
 				{
-					m min = mat.minor (row, i);
+					m min = mat.min (row, i);
 					if ((row + 1 + i + 1) % 2)
 					{
 						result += (-1) * mat[row][i] * m_det (min);
@@ -324,7 +416,7 @@ double m_det (m &mat) // matrix determinant
 			{
 				if (mat[i][col] != 0)
 				{
-					m min = mat.minor (i, col);
+					m min = mat.min (i, col);
 					if ((i + 1 + col + 1) % 2)
 					{
 						result += (-1) * mat[i][col] * m_det (min);
@@ -357,7 +449,7 @@ m m_inv (m &mat) // inverse of a matrix
 	{
 		for (int j = 0; j < result.getCols(); ++j)
 		{
-			m min = mat.minor (i, j);
+			m min = mat.min (i, j);
 			if ((i + 1 + j + 1) % 2)
 			{
 				result[i][j] = (-1) * m_det (min) / det;
@@ -369,6 +461,74 @@ m m_inv (m &mat) // inverse of a matrix
 		}
 	}
 	return m_trans (result);
+}
+
+
+//	Point
+
+struct p // point and its transformations
+{
+	double x, y, z;
+
+	p &operator+= (const p &rhs)
+	{
+		this->x += rhs.x;
+		this->y += rhs.y;
+		this->z += rhs.z;
+		return *this;
+	}
+
+
+
+	p &operator-= (const p &rhs)
+	{
+		this->x -= rhs.x;
+		this->y -= rhs.y;
+		this->z -= rhs.z;
+		return *this;
+	}
+
+
+	void translate (v &vec)
+	{
+		m point (1, 4);
+		point[0][0] = this->x;
+		point[0][1] = this->y;
+		point[0][2] = this->z;
+		point[0][3] = 1;
+		m trMat (4, 4);
+		trMat[0][0] = trMat[1][1] = trMat[2][2] = trMat[3][3] = 1;
+		trMat[0][3] = trMat[1][3] = trMat[2][3] = 0;
+		trMat[1][0] = trMat[2][0] = trMat[2][1] = trMat[0][1] = trMat[0][2] = trMat[1][2] = 0;
+		trMat[3][0] = vec.x;
+		trMat[3][1] = vec.y;
+		trMat[3][2] = vec.z;
+		m result = point * trMat;
+		this->x = result[0][0];
+		this->y = result[0][1];
+		this->z = result[0][2];
+	}
+};
+
+
+inline p operator+ (p lhs, const p &rhs)
+{
+	lhs += rhs;
+	return lhs;
+}
+
+
+inline p operator- (p lhs, const p &rhs)
+{
+	lhs -= rhs;
+	return lhs;
+}
+
+
+std::ostream &operator<< (std::ostream &output, const p &point)
+{
+	output << point.x << " " << point.y << " " << point.z;
+	return output;
 }
 
 

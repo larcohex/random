@@ -14,11 +14,11 @@ int main()
 	test2.x = -154.7;
 	test2.y = -87.432;
 	test2.z = 213.4;
-	cout << v_add (test1, test2) << endl;
-	cout << v_subtr (test1, test2) << endl;
-	cout << v_mult (434.12, test1) << endl;
-	cout << v_dot (test1, test2) << endl;
-	cout << v_cross (test1, test2) << endl;
+	cout << test1 + test2 << endl;
+	cout << test1 - test2 << endl;
+	cout << c_mult (434.12, test1) << endl;
+	cout << dot (test1, test2) << endl;
+	cout << cross (test1, test2) << endl;
 	cout << "\n\n\n\n" << endl;
 	m mest1 (3, 3);
 	m mest2 (3, 4);
@@ -45,8 +45,25 @@ int main()
 	mest2[2][2] = 6;
 	mest2[2][3] = 7;
 	cout << mest2 << endl;
-	cout << m_mult (mest1, mest2) << endl;
-	cout << mest1.minor (0, 1) << endl;
+	cout << mest1 * mest2 << endl;
+	cout << mest1.min (0, 1) << endl;
 	cout << m_det (mest1) << endl;
 	cout << m_inv (mest1) << endl;
+	cout << "\n\n\n\n" << endl;
+	mest2 = mest1;
+	cout << mest1 << endl;
+	cout << mest2 << endl;
+	cout << "\n\n\n\n" << endl;
+
+
+	p pest1;
+	pest1.x = 1;
+	pest1.y = 3;
+	pest1.z = -2;
+	v trans1;
+	trans1.x = 2;
+	trans1.y = -10;
+	trans1.z = 2;
+	pest1.translate (trans1);
+	cout << pest1 << endl;
 }
