@@ -3,6 +3,9 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <cmath>
+
+#define PI 3.14159265
 
 //	Classes
 
@@ -81,6 +84,10 @@ class m // matrix
 			for (int i = 0; i < nrows; ++i)
 			{
 				this->matrix[i] = new double [ncols];
+				for (int j = 0; j < ncols; ++j)
+				{
+					this->matrix[i][j] = 0;
+				}
 			}
 			this->nrows = nrows;
 			this->ncols = ncols;
@@ -489,7 +496,7 @@ struct p // point and its transformations
 	}
 
 
-	void translate (v &vec)
+	void translate (v &vec) // translate a point by a vector v
 	{
 		m point (1, 4);
 		point[0][0] = this->x;
@@ -498,8 +505,6 @@ struct p // point and its transformations
 		point[0][3] = 1;
 		m trMat (4, 4);
 		trMat[0][0] = trMat[1][1] = trMat[2][2] = trMat[3][3] = 1;
-		trMat[0][3] = trMat[1][3] = trMat[2][3] = 0;
-		trMat[1][0] = trMat[2][0] = trMat[2][1] = trMat[0][1] = trMat[0][2] = trMat[1][2] = 0;
 		trMat[3][0] = vec.x;
 		trMat[3][1] = vec.y;
 		trMat[3][2] = vec.z;
@@ -507,6 +512,81 @@ struct p // point and its transformations
 		this->x = result[0][0];
 		this->y = result[0][1];
 		this->z = result[0][2];
+	}
+
+	void rotate_x (double a) // rotate a point about x-axis by angle a
+	{
+		m point (1, 4);
+		point[0][0] = this->x;
+		point[0][1] = this->y;
+		point[0][2] = this->z;
+		point[0][3] = 1;
+		m trMat (4, 4);
+		trMat[0][0] = trMat[3][3] = 1;
+		trMat[1][1] = trMat[2][2] = std::cos (a * PI / 180.0);
+		trMat[1][2] = std::sin (a * PI / 180.0);
+		trMat[2][1] = (-1.0) * std::sin (a * PI / 180.0);
+		m result = point * trMat;
+		this->x = result[0][0];
+		this->y = result[0][1];
+		this->z = result[0][2];
+	}
+
+
+	void rotate_y (double a) // rotate a point about y-axis by angle a
+	{
+		m point (1, 4);
+		point[0][0] = this->x;
+		point[0][1] = this->y;
+		point[0][2] = this->z;
+		point[0][3] = 1;
+		m trMat (4, 4);
+		trMat[1][1] = trMat[3][3] = 1;
+		trMat[0][0] = trMat[2][2] = std::cos (a * PI / 180.0);
+		trMat[2][0] = std::sin (a * PI / 180.0);
+		trMat[0][2] = (-1.0) * std::sin (a * PI / 180.0);
+		m result = point * trMat;
+		this->x = result[0][0];
+		this->y = result[0][1];
+		this->z = result[0][2];
+	}
+
+
+	void rotate_z (double a) // rotate a point about y-axis by angle a
+	{
+		m point (1, 4);
+		point[0][0] = this->x;
+		point[0][1] = this->y;
+		point[0][2] = this->z;
+		point[0][3] = 1;
+		m trMat (4, 4);
+		trMat[2][2] = trMat[3][3] = 1;
+		trMat[0][0] = trMat[1][1] = std::cos (a * PI / 180.0);
+		trMat[0][1] = std::sin (a * PI / 180.0);
+		trMat[1][0] = (-1.0) * std::sin (a * PI / 180.0);
+		m result = point * trMat;
+		this->x = result[0][0];
+		this->y = result[0][1];
+		this->z = result[0][2];
+	}
+
+
+	void scale (int s_x, int s_y, int s_z)
+	{
+		m point (1, 4);
+		point[0][0] = this->x;
+		point[0][1] = this->y;
+		point[0][2] = this->z;
+		point[0][3] = 1;
+		m trMat (4, 4);
+		trMat[0][0] = s_x;
+		trMat[1][1] = s_y;
+		trMat[2][2] = s_z;
+		trMat[3][3] = 1;
+		m result = point * trMat;
+		this->x = result[0][0];
+		this->y = result[0][1];
+		this->z = result[0][2];		
 	}
 };
 
